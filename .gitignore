@@ -1,0 +1,28 @@
+node_modules
+.next
+out
+*.tsbuildinfo
+next-env.d.ts
+.env*.local
+
+# Ruflo local secrets and runtime data
+.env
+.env.local
+.env.*.local
+.claude-flow/data/
+.claude-flow/logs/
+.claude-flow/sessions/
+.next-verify
+
+# Original full-size photos/audio (sources for scripts/optimize-images.mjs) — kept local, not deployed
+public/mobile-image/
+public/desktop-image/
+public/details/
+
+# Local AI tooling
+.agents/
+.claude/
+.claude-flow/
+.swarm/
+.mcp.json
+.env.example
