@@ -1,3 +1,4 @@
+import { DEFAULT_ORDER } from "./sections";
 // ─────────────────────────────────────────────────────────────
 //  ALL INVITATION CONTENT LIVES HERE — edit this file per client.
 // ─────────────────────────────────────────────────────────────
@@ -227,6 +228,12 @@ export const defaultWedding = {
       { bank: "Bank", accountName: "Pia Klariz Padilla", accountNumber: "To follow", qr: "" },
       { bank: "GCash", accountName: "Christian Ortua", accountNumber: "To follow", qr: "" },
     ],
+  },
+
+  // Page layout: order of the sections between the hero and the footer, and which are switched off.
+  layout: {
+    order: [...DEFAULT_ORDER] as string[],
+    hidden: [] as string[],
   },
 
   // Every photo on the site. Local defaults live in /public/images; dashboard uploads become /api/photo/<driveId>.

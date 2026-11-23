@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Opening from "@/components/Opening";
 import Hero from "@/components/Hero";
 import PersonalLetter from "@/components/PersonalLetter";
@@ -17,27 +18,35 @@ import Footer from "@/components/Footer";
 import RevealObserver from "@/components/RevealObserver";
 import { WeddingProvider } from "@/components/WeddingProvider";
 import { getContent } from "@/lib/content";
+import { normalizeOrder, type SectionKey } from "@/lib/sections";
+
+// Each movable section; the order and visibility come from the dashboard (Layout tab).
+const BLOCKS: Record<SectionKey, () => React.ReactNode> = {
+  letter: () => <PersonalLetter />,
+  savedate: () => <SaveTheDate />,
+  venues: () => <Venues />,
+  dresscode: () => <DressCode />,
+  entourage: () => <Entourage />,
+  hashtag: () => <Hashtag />,
+  gallery: () => <Gallery />,
+  invitation: () => <Invitation />,
+  rsvp: () => <Rsvp />,
+  wishes: () => <Wishes />,
+  reminders: () => <Reminders />,
+  thanks: () => <ThankYou />,
+  gifts: () => <Gifts />,
+};
 
 export default async function Page() {
   const content = await getContent();
+  const hidden = new Set(content.layout?.hidden ?? []);
+  const order = normalizeOrder(content.layout?.order).filter((k) => !hidden.has(k));
   return (
     <WeddingProvider value={content}>
       <Opening />
       <main>
         <Hero />
-        <PersonalLetter />
-        <SaveTheDate />
-        <Venues />
-        <DressCode />
-        <Entourage />
-        <Hashtag />
-        <Gallery />
-        <Invitation />
-        <Rsvp />
-        <Wishes />
-        <Reminders />
-        <ThankYou />
-        <Gifts />
+        {order.map((k) => <Fragment key={k}>{BLOCKS[k]()}</Fragment>)}
       </main>
       <Footer />
       <RevealObserver />

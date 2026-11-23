@@ -2,8 +2,9 @@
 import { useWedding } from "./WeddingProvider";
 import Monogram from "./Monogram";
 import { IconUp } from "./Icons";
+import { menuSections } from "@/lib/sections";
 
-const links = [["Details", "details"], ["Dress Code", "dress-code"], ["Entourage", "entourage"], ["RSVP", "rsvp"], ["Gifts", "gifts"]];
+const SHORT: Record<string, string> = { "Ceremony & Reception": "Details", "Save the Date": "Save the Date" };
 
 const DEV = { name: "Lance Valle", url: "https://lance28-beep.github.io/portfolio-website/" };
 const STUDIO = { name: "Wedding Invitation Naga", url: "https://www.facebook.com/WeddingInvitationNaga/" };
@@ -11,6 +12,7 @@ const STUDIO = { name: "Wedding Invitation Naga", url: "https://www.facebook.com
 export default function Footer() {
   const wedding = useWedding();
   const year = new Date(wedding.dateISO).getFullYear();
+  const links = menuSections(wedding.layout?.order, wedding.layout?.hidden).map((s) => [SHORT[s.menu] ?? s.menu, s.anchor]);
   return (
     <footer className="footer">
       <div className="footer-main">

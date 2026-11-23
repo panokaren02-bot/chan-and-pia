@@ -5,17 +5,15 @@ import { weekdayOf } from "@/lib/date";
 import { useWedding } from "./WeddingProvider";
 import Monogram from "./Monogram";
 import IntroScene, { type Stage } from "./IntroScene";
-
-const sections = [
-  ["Home", "home"], ["Save the Date", "save-the-date"], ["Ceremony & Reception", "details"],
-  ["Dress Code", "dress-code"], ["Entourage", "entourage"], ["Gallery", "gallery"],
-  ["RSVP", "rsvp"], ["Reminders", "reminders"], ["Gifts", "gifts"],
-] as const;
+import { menuSections } from "@/lib/sections";
 
 
 export default function Opening() {
   const wedding = useWedding();
   const weekday = weekdayOf(wedding);
+  // menu follows the dashboard's section order and skips hidden sections
+  const sections: [string, string][] = [["Home", "home"], ...menuSections(wedding.layout?.order, wedding.layout?.hidden).map((s) => [s.menu, s.anchor] as [string, string])];
+  const rsvpOn = !(wedding.layout?.hidden ?? []).includes("rsvp");
   const [stage, setStage] = useState<Stage>("closed");
   const [solid, setSolid] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -98,7 +96,7 @@ export default function Opening() {
       <header className={`nav ${solid ? "solid" : ""} ${menu ? "menu-open" : ""}`}>
         <a href="#home" className="brand" onClick={() => setMenu(false)}><Monogram /></a>
         <div className="nav-right">
-          <a href="#rsvp" className="nav-rsvp" onClick={() => setMenu(false)}>RSVP</a>
+          {rsvpOn && <a href="#rsvp" className="nav-rsvp" onClick={() => setMenu(false)}>RSVP</a>}
           <button className={`burger ${menu ? "open" : ""}`} onClick={() => setMenu((m) => !m)} aria-label="Menu" aria-expanded={menu}>
             <span /><span /><span />
           </button>

@@ -69,6 +69,7 @@ export default function Hero() {
     return () => { cancelAnimationFrame(raf); window.removeEventListener("scroll", onScroll); };
   }, []);
 
+  const rsvpOn = !(wedding.layout?.hidden ?? []).includes("rsvp");
   const units = Object.entries(t?.units ?? { Days: 0, Hours: 0, Minutes: 0, Seconds: 0 });
 
   return (
@@ -107,7 +108,7 @@ export default function Hero() {
         )}
 
         <div className="hero-cta">
-          <a className="hero-btn" href="#rsvp">Kindly RSVP</a>
+          {rsvpOn && <a className="hero-btn" href="#rsvp">Kindly RSVP</a>}
           <a className="hero-link" href={googleCalendarUrl(wedding)} target="_blank" rel="noopener noreferrer">Add to calendar</a>
         </div>
       </div>

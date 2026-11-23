@@ -10,6 +10,7 @@ const P: Record<string, React.ReactNode> = {
   rsvp: <><rect x="4" y="4" width="16" height="17" rx="2" /><path d="M8 2v4M16 2v4M4 10h16m-11 4 2 2 4-4" /></>,
   gifts: <><rect x="3" y="8" width="18" height="5" rx="1" /><path d="M5 13v8h14v-8M12 8v13M12 8S10.5 3 8 4s0 4 4 4Zm0 0s1.5-5 4-4 0 4-4 4Z" /></>,
   music: <><path d="M9 18V5l11-2v13" /><circle cx="6.5" cy="18" r="2.5" /><circle cx="17.5" cy="16" r="2.5" /></>,
+  layout: <><rect x="3" y="4" width="18" height="5" rx="1" /><rect x="3" y="11" width="18" height="4" rx="1" /><rect x="3" y="17" width="18" height="3" rx="1" /></>,
   responses: <><path d="M4 20V10M10 20V4M16 20v-7M22 20H2" /></>,
   external: <><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></>,
   menu: <><path d="M4 7h16M4 12h16M4 17h16" /></>,

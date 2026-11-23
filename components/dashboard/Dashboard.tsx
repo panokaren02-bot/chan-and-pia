@@ -4,13 +4,14 @@ import { photoSlotInfo, slugify, type PhotoSlotKey, type Wedding } from "@/lib/w
 import { Area, Card, CopyLink, Grid, NumberField, ObjectList, PhotoGrid, PhotoPicker, Section, StringList, Text } from "./fields";
 import { Icon } from "./icons";
 import Rsvps from "./Rsvps";
+import LayoutEditor from "./LayoutEditor";
 
 const NAV = [
-  ["couple", "Couple & Date"], ["venues", "Ceremony & Reception"], ["photos", "Photos"], ["dress", "Dress Code"],
+  ["couple", "Couple & Date"], ["layout", "Page Layout"], ["venues", "Ceremony & Reception"], ["photos", "Photos"], ["dress", "Dress Code"],
   ["entourage", "Entourage"], ["invites", "Personal Invites"], ["messages", "Messages"], ["rsvp", "RSVP & Reminders"],
   ["gifts", "Gifts"], ["music", "Music"], ["responses", "RSVP Responses"],
 ] as const;
-const SHORT: Partial<Record<Tab, string>> = { venues: "Venues", invites: "Invites", rsvp: "RSVP", responses: "Responses" };
+const SHORT: Partial<Record<Tab, string>> = { layout: "Layout", venues: "Venues", invites: "Invites", rsvp: "RSVP", responses: "Responses" };
 type Tab = (typeof NAV)[number][0];
 
 // "2027-05-14T13:30:00+08:00" <-> "2027-05-14T13:30" for <input type="datetime-local">
@@ -174,6 +175,11 @@ export default function Dashboard({ initial, connected }: { initial: Wedding; co
                 </Grid>
               </Card>
             </Section>
+          )}
+
+          {tab === "layout" && (
+            <LayoutEditor order={c.layout?.order ?? []} hidden={c.layout?.hidden ?? []}
+              onChange={(order, hidden) => up((d) => { d.layout = { order: [...order], hidden: [...hidden] }; })} />
           )}
 
           {tab === "venues" && (
