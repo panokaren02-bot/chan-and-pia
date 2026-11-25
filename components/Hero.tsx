@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useWedding } from "./WeddingProvider";
+import { useWedding, useHiddenSections } from "./WeddingProvider";
 import { googleCalendarUrl, weddingDate, weekdayOf } from "@/lib/date";
 import { findInvite } from "@/lib/wedding";
 import Monogram from "./Monogram";
@@ -69,7 +69,7 @@ export default function Hero() {
     return () => { cancelAnimationFrame(raf); window.removeEventListener("scroll", onScroll); };
   }, []);
 
-  const rsvpOn = !(wedding.layout?.hidden ?? []).includes("rsvp");
+  const rsvpOn = !useHiddenSections().includes("rsvp");
   const units = Object.entries(t?.units ?? { Days: 0, Hours: 0, Minutes: 0, Seconds: 0 });
 
   return (

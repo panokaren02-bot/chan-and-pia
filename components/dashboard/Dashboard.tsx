@@ -1,10 +1,14 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { photoSlotInfo, slugify, type PhotoSlotKey, type Wedding } from "@/lib/wedding";
-import { Area, Card, CopyLink, Grid, NumberField, ObjectList, PhotoGrid, PhotoPicker, Section, StringList, Text } from "./fields";
+import { defaultWedding, photoSlotInfo, slugify, type PhotoSlotKey, type Wedding } from "@/lib/wedding";
+import { Area, Card, Grid, NumberField, ObjectList, PhotoGrid, PhotoPicker, Section, StringList, Text } from "./fields";
 import { Icon } from "./icons";
 import Rsvps from "./Rsvps";
 import LayoutEditor from "./LayoutEditor";
+import { customRoleFrom, roleCore, roleSuggestions, statusOf } from "@/lib/entourage";
+import type { InvitesSource } from "@/lib/content";
+import EntourageEditor from "./EntourageEditor";
+import InvitesTable from "./InvitesTable";
 
 const NAV = [
   ["couple", "Couple & Date"], ["layout", "Page Layout"], ["venues", "Ceremony & Reception"], ["photos", "Photos"], ["dress", "Dress Code"],
@@ -20,7 +24,7 @@ const fromLocal = (v: string) => `${v}:00+08:00`;
 const labelFor = (v: string) =>
   new Date(`${v}:00+08:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "Asia/Manila" });
 
-export default function Dashboard({ initial, connected }: { initial: Wedding; connected: boolean }) {
+export default function Dashboard({ initial, connected, invitesSource }: { initial: Wedding; connected: boolean; invitesSource?: InvitesSource }) {
   const [c, setC] = useState<Wedding>(initial);
   const [saved, setSaved] = useState(() => JSON.stringify(initial));
   const [tab, setTab] = useState<Tab>("couple");
@@ -49,21 +53,41 @@ export default function Dashboard({ initial, connected }: { initial: Wedding; co
   }, [menu]);
 
   const up = useCallback((fn: (d: Wedding) => void) => setC((prev) => { const n = structuredClone(prev); fn(n); return n; }), []);
+  // Personal invites are the one list of people; the Entourage tab is a grouped view of them.
+  // Changing someone's status from the dashboard stamps it, so the sheet knows it's newer than an older reply.
+  const setInvites = useCallback((v: Wedding["invites"]) => up((d) => {
+    d.invites = v.map((x, i) => {
+      const old = d.invites[i];
+      return old && old.name === x.name && statusOf(old) !== statusOf(x) && old.respondedAt === x.respondedAt
+        ? { ...x, respondedAt: new Date().toISOString() } : x;
+    });
+  }), [up]);
+  const roles = useMemo(() => roleSuggestions(c), [c]);
+  // a new role (e.g. Candle Sponsors): its people get their own heading in the Entourage
+  const addRole = useCallback((r: { label: string; ask: string }) => up((d) => {
+    const list = d.customRoles ?? [];
+    if (!list.some((x) => roleCore(x.ask) === roleCore(r.ask) || roleCore(x.label) === roleCore(r.label))) d.customRoles = [...list, r];
+  }), [up]);
+  // names already saved to the sheet: only their links work yet
+  const savedNames = useMemo(() => new Set((JSON.parse(saved) as Wedding).invites.map((i) => slugify(i.name))), [saved]);
 
   const save = useCallback(async () => {
     if (!connected) return;
     setStatus({ kind: "saving" });
     try {
-      const res = await fetch("/api/admin/content", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: c }) });
+      const res = await fetch("/api/admin/content", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ content: { ...c, _loadedInvites: [...savedNames] } }) });
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) { window.location.reload(); return; }
       if (!res.ok || !data.ok) throw new Error(data.error || `Save failed (${res.status})`);
-      setSaved(JSON.stringify(c));
+      // take the sheet's invite list back: it includes replies that arrived while the dashboard was open
+      const next = Array.isArray(data.invites) ? { ...c, invites: data.invites } : c;
+      setC(next);
+      setSaved(JSON.stringify(next));
       setStatus({ kind: "ok", msg: "Saved — the live site is updated." });
     } catch (e) {
       setStatus({ kind: "err", msg: e instanceof Error ? e.message : "Save failed" });
     }
-  }, [c, connected]);
+  }, [c, connected, savedNames]);
 
   // ⌘/Ctrl + S saves; warn before leaving with unsaved changes
   useEffect(() => {
@@ -81,6 +105,7 @@ export default function Dashboard({ initial, connected }: { initial: Wedding; co
 
   const idx = NAV.findIndex(([id]) => id === tab);
   const next = NAV[idx + 1];
+  const prev = NAV[idx - 1];
   const showBar = dirty || status.kind === "saving" || status.kind === "err";
 
   return (
@@ -91,7 +116,10 @@ export default function Dashboard({ initial, connected }: { initial: Wedding; co
             <span className="db-mono" style={{ WebkitMaskImage: `url("${c.monogramImage}")`, maskImage: `url("${c.monogramImage}")` }} />
             <div>
               <strong>{c.groom} &amp; {c.bride}</strong>
-              <small>Invitation dashboard</small>
+              <small className="db-desk-only">Invitation dashboard</small>
+              <small className={`db-mob-status db-status-${dirty ? "dirty" : status.kind === "err" ? "err" : "ok"}`}>
+                {status.kind === "saving" ? "Saving…" : dirty ? "Unsaved changes" : "All changes saved"}
+              </small>
             </div>
           </div>
           <div className="db-top-actions">
@@ -224,13 +252,6 @@ export default function Dashboard({ initial, connected }: { initial: Wedding; co
                 <PhotoGrid label="Gallery photos" items={c.photos.gallery} enabled={connected} onChange={(v) => up((d) => { d.photos.gallery = v; })}
                   hint="Shown in the “Our Story in Frames” section. Select several files at once to add them together." />
               </Card>
-              <Card title="Hashtag collage">
-                <PhotoGrid label="Prints around the hashtag polaroid" items={c.photos.hashCollage} enabled={connected}
-                  onChange={(v) => up((d) => { d.photos.hashCollage = v; })}
-                  hint="Up to 8 photos hanging on gold strings around the hashtag polaroid. The centre photo is “Hashtag polaroid” under Section photos." />
-                <StringList label="Handwritten captions (same order as the photos)" items={c.photos.hashCaptions ?? []}
-                  onChange={(v) => up((d) => { d.photos.hashCaptions = v; })} addLabel="Add caption" />
-              </Card>
               <Card title="Opening collage">
                 <PhotoGrid label="Collage prints" items={c.photos.collage} enabled={connected} fixed onChange={(v) => up((d) => { d.photos.collage = v; })}
                   hint="The 12 photos scattered behind the envelope. Use ⟳ to replace one. Prints 1, 3, 5, 7, 8, 10 and 12 are portrait polaroids; 2, 4, 6, 9 and 11 are landscape prints." />
@@ -261,49 +282,49 @@ export default function Dashboard({ initial, connected }: { initial: Wedding; co
           )}
 
           {tab === "entourage" && (
-            <Section id="entourage" title="Entourage">
-              <Card title="Principal sponsors">
-                <Grid>
-                  <StringList label="Ninong" items={c.entourage.ninongs} onChange={(v) => up((d) => { d.entourage.ninongs = v; })} addLabel="Add ninong" />
-                  <StringList label="Ninang" items={c.entourage.ninangs} onChange={(v) => up((d) => { d.entourage.ninangs = v; })} addLabel="Add ninang" />
-                </Grid>
-              </Card>
-              <Card title="Best man & maid of honor">
-                <Grid>
-                  <Text label="Best man" value={c.entourage.bestMan} onChange={(v) => up((d) => { d.entourage.bestMan = v; })} />
-                  <Text label="Maid of honor" value={c.entourage.maidOfHonor} onChange={(v) => up((d) => { d.entourage.maidOfHonor = v; })} />
-                </Grid>
-              </Card>
-              <Card title="Squads">
-                <Grid>
-                  <StringList label="Groom's squad" items={c.entourage.groomSquad} onChange={(v) => up((d) => { d.entourage.groomSquad = v; })} />
-                  <StringList label="Bride's squad" items={c.entourage.brideSquad} onChange={(v) => up((d) => { d.entourage.brideSquad = v; })} />
-                </Grid>
-              </Card>
-              <Card title="Bearers & flower girls">
-                <Grid>
-                  <ObjectList label="Bearers" items={c.entourage.bearers} onChange={(v) => up((d) => { d.entourage.bearers = v; })}
-                    make={() => ({ role: "", name: "" })} titleOf={(it) => it.role} subOf={(it) => it.name}
-                    fields={[{ key: "role", label: "Role" }, { key: "name", label: "Name" }]} />
-                  <StringList label="Flower girls" items={c.entourage.flowerGirls} onChange={(v) => up((d) => { d.entourage.flowerGirls = v; })} />
-                </Grid>
-              </Card>
+            <Section id="entourage" title="Entourage"
+              desc="Everyone here also has a personal invite, so adding or renaming someone here updates Personal Invites too. Only Approved people appear in the Entourage on the website.">
+              <SheetNotice source={invitesSource} />
+              <EntourageEditor w={c} onChange={setInvites} />
             </Section>
           )}
 
           {tab === "invites" && (
-            <Section id="invites" title="Personal Invites" desc="Each person gets their own link that opens with a personal letter (“Hello, Tito Orly … Will you be our Ninong?”).">
-              <Card title="Letter">
+            <Section id="invites" title="Personal Invites"
+              desc="Each person gets their own link that opens a personal letter (“Hello, Tito Orly … Will you be our Ninong?”). The list is stored in the “Invites” tab of your Google Sheet. An entourage role adds the person to the Entourage, and they appear on the website once their status is Approved.">
+              <SheetNotice source={invitesSource} />
+              <InvitesTable w={c} savedNames={savedNames} origin={origin} roles={roles} onChange={setInvites} onAddRole={addRole} />
+              <Card title="Roles">
+                <p className="db-hint">
+                  Built in: Ninong, Ninang, Best Man, Maid of Honor, Groom’s &amp; Bride’s Squad, Bearers and Flower Girls.
+                  Add your own below. Anyone whose role matches gets their own heading in the Entourage (once Approved).
+                </p>
+                <ObjectList label="Your own roles" items={c.customRoles ?? []} addLabel="Add role"
+                  onChange={(v) => up((d) => { d.customRoles = v; })}
+                  make={() => ({ label: "", ask: "" })} titleOf={(it) => it.label || "New role"} subOf={(it) => it.ask && `“Will you be ${it.ask}?”`}
+                  fields={[{ key: "label", label: "Heading in the Entourage", hint: "e.g. Candle Sponsors" }, { key: "ask", label: "Role (Will you be …?)", hint: "e.g. our candle sponsor" }]} />
+                <div className="db-role-quick">
+                  <span className="db-label">Quick add</span>
+                  {["our candle sponsor", "our veil sponsor", "our cord sponsor", "our coin sponsor", "our Bible reader", "our offertory sponsor"]
+                    .map(customRoleFrom).filter((r) => !(c.customRoles ?? []).some((x) => roleCore(x.ask) === roleCore(r.ask)))
+                    .map((r) => <button key={r.ask} type="button" className="db-chip" onClick={() => addRole(r)}>+ {r.label}</button>)}
+                </div>
+              </Card>
+              <Card title="Letter" aside={
+                <button className="db-btn db-btn-ghost" onClick={() => window.confirm("Replace the letter paragraphs and role paragraphs with the suggested wording?") &&
+                  up((d) => { d.letter.lines = [...defaultWedding.letter.lines]; d.letter.notes = { ...defaultWedding.letter.notes }; })}>Use suggested wording</button>}>
+                <p className="db-hint">The letter opens with “Dear {"{nickname}"},”, then these paragraphs, then a paragraph for their role, then the question by name: “Tito Orly, will you be our Ninong?” with Yes / No buttons.</p>
                 <StringList label="Paragraphs" multiline items={c.letter.lines} onChange={(v) => up((d) => { d.letter.lines = v; })} addLabel="Add paragraph" />
+                <div className="db-grid db-grid-2">
+                  {([["sponsors", "For ninongs & ninangs"], ["honor", "For best man & maid of honor"], ["squad", "For the groom’s & bride’s squads"], ["little", "For bearers & flower girls"]] as const).map(([k, label]) => (
+                    <Area key={k} label={label} rows={4} value={c.letter.notes?.[k] ?? ""} onChange={(v) => up((d) => { d.letter.notes = { ...defaultWedding.letter.notes, ...d.letter.notes, [k]: v }; })} />
+                  ))}
+                </div>
                 <Text label="Sign-off" value={c.letter.signoff} onChange={(v) => up((d) => { d.letter.signoff = v; })} />
+                <Area label="Share message" rows={4} value={c.letter.shareMessage} onChange={(v) => up((d) => { d.letter.shareMessage = v; })}
+                  hint="Pre-filled when you tap Share. Use {nickname}, {name}, {role}, {couple} and {link}." />
               </Card>
-              <Card title="People" aside={<a className="db-btn db-btn-ghost" href="/invites" target="_blank" rel="noopener noreferrer"><Icon name="external" size={16} />All links</a>}>
-                <ObjectList label="Invites" items={c.invites} onChange={(v) => up((d) => { d.invites = v; })} searchable addLabel="Add person"
-                  make={() => ({ name: "", nickname: "", role: "" })}
-                  titleOf={(it) => it.name || "New person"} subOf={(it) => [it.nickname, it.role].filter(Boolean).join(" · ")}
-                  extra={(it) => it.name ? <CopyLink url={`${origin}/?to=${slugify(it.name)}`} /> : null}
-                  fields={[{ key: "name", label: "Full name" }, { key: "nickname", label: "Nickname (Hello, …)" }, { key: "role", label: "Role (Will you be …?)", wide: true }]} />
-              </Card>
+              <a className="db-btn db-btn-ghost db-inv-all" href="/invites" target="_blank" rel="noopener noreferrer"><Icon name="external" size={16} />Open the printable list of all links</a>
             </Section>
           )}
 
@@ -378,11 +399,18 @@ export default function Dashboard({ initial, connected }: { initial: Wedding; co
               })} />
           )}
 
-          {next && (
-            <button className="db-next" onClick={() => go(next[0])}>
-              <span><small>Next</small>{next[1]}</span><Icon name="right" />
-            </button>
-          )}
+          <div className="db-pager">
+            {prev && (
+              <button className="db-next db-prev" onClick={() => go(prev[0])}>
+                <Icon name="left" /><span><small>Previous</small>{SHORT[prev[0]] ?? prev[1]}</span>
+              </button>
+            )}
+            {next && (
+              <button className="db-next" onClick={() => go(next[0])}>
+                <span><small>Next</small>{next[1]}</span><Icon name="right" />
+              </button>
+            )}
+          </div>
         </main>
       </div>
 
@@ -423,6 +451,23 @@ export default function Dashboard({ initial, connected }: { initial: Wedding; co
       )}
     </div>
   );
+}
+
+/** Explains why no names came from Google, and how to fix it. */
+function SheetNotice({ source }: { source?: InvitesSource }) {
+  if (source === "old-script") return (
+    <div className="db-banner db-sheet-notice">
+      <strong>Names can’t load from Google yet: your Apps Script is an older version.</strong> In the Google Sheet open Extensions → Apps Script,
+      paste the new <code>google-apps-script/Code.gs</code>, save, then Deploy → Manage deployments → Edit (pencil) → Version: <b>New version</b> → Deploy.
+    </div>
+  );
+  if (source === "no-tab") return (
+    <div className="db-banner db-sheet-notice">
+      <strong>Your Google Sheet has no “Invites” tab yet.</strong> In Apps Script choose the function <code>setup</code> and click Run. It creates the tab
+      with the columns Name, Nickname, Role, Status and Responded At. Then add the names there and reload this page.
+    </div>
+  );
+  return null;
 }
 
 function SlotEditor({ c, slot, up, connected, titled }: {

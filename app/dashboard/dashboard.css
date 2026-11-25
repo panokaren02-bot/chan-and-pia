@@ -334,3 +334,11 @@
   .db-layout-grip { display: none; }
   .db-layout-row { cursor: default; }
 }
+
+
+/* invite status */
+.db-pill { flex-shrink: 0; align-self: center; padding: 3px 10px; border-radius: 999px; font-size: .74rem; font-weight: 600; letter-spacing: .02em; white-space: nowrap; }
+.db-pill-pending { background: #fff4dc; color: #8a6414; border: 1px solid #ecd6a6; }
+.db-pill-approved { background: #e6f4ea; color: #1f6b3a; border: 1px solid #b8dcc4; }
+.db-pill-declined { background: #fbe9e9; color: #9b2c2c; border: 1px solid #ecc2c2; }
+.db-status-select { flex-shrink: 0; min-width: 0; padding: 6px 8px; border: 1px solid var(--db-line); border-radius: 8px; font: 600 .85rem var(--font-body); color: var(--db-ink); cursor: pointer; }

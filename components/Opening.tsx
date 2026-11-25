@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { findInvite } from "@/lib/wedding";
 import { weekdayOf } from "@/lib/date";
-import { useWedding } from "./WeddingProvider";
+import { useHiddenSections, useWedding } from "./WeddingProvider";
 import Monogram from "./Monogram";
 import IntroScene, { type Stage } from "./IntroScene";
 import { menuSections } from "@/lib/sections";
@@ -12,8 +12,9 @@ export default function Opening() {
   const wedding = useWedding();
   const weekday = weekdayOf(wedding);
   // menu follows the dashboard's section order and skips hidden sections
-  const sections: [string, string][] = [["Home", "home"], ...menuSections(wedding.layout?.order, wedding.layout?.hidden).map((s) => [s.menu, s.anchor] as [string, string])];
-  const rsvpOn = !(wedding.layout?.hidden ?? []).includes("rsvp");
+  const hidden = useHiddenSections();
+  const sections: [string, string][] = [["Home", "home"], ...menuSections(wedding.layout?.order, hidden).map((s) => [s.menu, s.anchor] as [string, string])];
+  const rsvpOn = !hidden.includes("rsvp");
   const [stage, setStage] = useState<Stage>("closed");
   const [solid, setSolid] = useState(false);
   const [menu, setMenu] = useState(false);

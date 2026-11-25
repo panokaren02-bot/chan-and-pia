@@ -1,10 +1,14 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { useWedding } from "./WeddingProvider";
+import { IconCopy } from "./Icons";
+import { useToast, copyText } from "./useToast";
 
 export default function Gallery() {
   const [idx, setIdx] = useState<number | null>(null);
-  const srcs = useWedding().photos.gallery;
+  const wedding = useWedding();
+  const srcs = wedding.photos.gallery;
+  const toast = useToast();
   const go = useCallback((d: number) => setIdx((i) => (i === null ? i : (i + d + srcs.length) % srcs.length)), [srcs.length]);
 
   useEffect(() => {
@@ -27,6 +31,15 @@ export default function Gallery() {
           <h2 className="title">Our <em>Story</em> in Frames</h2>
           <div className="rule" />
         </header>
+        {wedding.hashtag && (
+          <div className="gal-tag reveal">
+            <p className="gal-tag-hint">Share your photos with our hashtag</p>
+            <p className="gal-tag-name">{wedding.hashtag}</p>
+            <button className="btn btn-outline btn-sm" onClick={async () => (await copyText(wedding.hashtag)) && toast.show("Hashtag copied")}>
+              <IconCopy /> Copy hashtag
+            </button>
+          </div>
+        )}
         <div className="gallery-grid">
           {srcs.map((src, i) => (
             <button key={src} className="g-item reveal" onClick={() => setIdx(i)} aria-label={`Open photo ${i + 1}`}>
@@ -45,6 +58,7 @@ export default function Gallery() {
           <div className="lb-count">{idx + 1} / {srcs.length}</div>
         </div>
       )}
+      {toast.node}
     </section>
   );
 }

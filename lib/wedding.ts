@@ -90,100 +90,34 @@ export const defaultWedding = {
     ],
   },
 
-  entourage: {
-    ninongs: [
-      "Orlando Balbuena",
-      "Jason Cruz",
-      "Rolando Montecillo",
-      "Raphael Luis Marcelo",
-      "Larry Ramo",
-      "Bill Dela Pena",
-    ],
-    ninangs: [
-      "Ma. Christina Pabayo",
-      "Cynthia Baclagon",
-      "Dorothy Dela Pena",
-      "Riza Ramo",
-      "Rosemarie Pelone",
-    ],
-    bestMan: "David Angelo Arquero",
-    maidOfHonor: "Nefeteri Anne Ual",
-    groomSquad: [
-      "Paul Santos",
-      "Maureen Doydora",
-      "Edrian Caranagan",
-      "Mari Grace Balbuena",
-      "Luigie Gavino",
-      "Marjorie Ortua",
-      "Karl Dajalos",
-      "Jefferson Visaya",
-      "Marridel Del Rosario",
-    ],
-    brideSquad: [
-      "Danelyn Sumaylo",
-      "Paul Krizchan Padilla",
-      "Kathleen Claire Girang",
-      "Patrick Kenneth Padilla",
-      "Sheila Marey Librao",
-      "Maria Angelica Visaya",
-      "Mikee Soriano",
-      "Iris Sia",
-    ],
-    bearers: [
-      { role: "Bible Bearer", name: "Prince Yuri Madrid" },
-      { role: "Ring Bearer", name: "Jace Kendrei Padilla" },
-      { role: "Coin Bearer", name: "Jacine Kaliyah Padilla" },
-    ],
-    flowerGirls: ["Jacel Kamilah Padilla", "Gemma Rich Madrid"],
-  },
-
   // Personal letter shown when the link has ?to=<slug> (slug = full name, lowercased, dashes).
-  // See /invites for every guest's personal link.
+  // See /invites for every guest's personal link. The Entourage section is built from the invites
+  // (role → group) and shows only Approved people.
   letter: {
     lines: [
-      "We are getting married!",
-      "As we look forward to saying “I do”, we have been thinking about the people we want closest to us when that moment finally comes.",
-      "Of course, you’re one of them!",
+      "We’re getting married!",
+      "As we count down the days to saying “I do,” we keep thinking about the people who have loved us, guided us and cheered us on — the ones we want closest to us when that moment comes.",
+      "You are one of them.",
     ],
+    // a short paragraph for each kind of role, shown just before the question ({nickname} works here too)
+    notes: {
+      sponsors: "Your faith, your wisdom and the way you live out your own marriage have inspired us. We would be honored to have you stand with us before God as one of our principal sponsors, and to keep guiding us as we build our home together.",
+      honor: "You have been there through every chapter of our story. There is no one we would rather have standing right beside us when we say “I do.”",
+      squad: "You have filled our lives with laughter, support and so many memories. Our day would not be complete without you walking down the aisle with us.",
+      little: "We have a very special job for you on our wedding day, and we can’t wait to see you walk down the aisle!",
+      special: "You hold a special place in our hearts, and we would be honored to have you play a part in our ceremony.",
+    },
     signoff: "With love,",
+    // message the dashboard pre-fills when you share someone's link. {nickname} {name} {role} {couple} {link}
+    shareMessage:
+      "Hi {nickname}! 💌\n\n{couple} have a special question for you. Open your personal invitation here:\n{link}",
   },
-  invites: [
-    { name: "Orlando Balbuena", nickname: "Tito Orly", role: "our Ninong" },
-    { name: "Jason Cruz", nickname: "Sir Cruz", role: "our Ninong" },
-    { name: "Rolando Montecillo", nickname: "Tito Tikboy", role: "our Ninong" },
-    { name: "Raphael Luis Marcelo", nickname: "Raph", role: "our Ninong" },
-    { name: "Larry Ramo", nickname: "Tito Larry", role: "our Ninong" },
-    { name: "Bill Dela Pena", nickname: "Tito Bill", role: "our Ninong" },
-    { name: "Ma. Christina Pabayo", nickname: "Mam Pabayo", role: "our Ninang" },
-    { name: "Cynthia Baclagon", nickname: "Tita Ching", role: "our Ninang" },
-    { name: "Dorothy Dela Pena", nickname: "Tita Dorie", role: "our Ninang" },
-    { name: "Riza Ramo", nickname: "Tita Riza", role: "our Ninang" },
-    { name: "Rosemarie Pelone", nickname: "Rose", role: "our Ninang" },
-    { name: "David Angelo Arquero", nickname: "David", role: "Chan’s Best Man" },
-    { name: "Nefeteri Anne Ual", nickname: "Nef", role: "Pia’s Maid of Honor" },
-    { name: "Paul Santos", nickname: "Paul", role: "part of our groom’s squad" },
-    { name: "Maureen Doydora", nickname: "Ate Mau", role: "part of our groom’s squad" },
-    { name: "Edrian Caranagan", nickname: "Ian", role: "part of our groom’s squad" },
-    { name: "Mari Grace Balbuena", nickname: "Ate Grace", role: "part of our groom’s squad" },
-    { name: "Luigie Gavino", nickname: "Gie", role: "part of our groom’s squad" },
-    { name: "Marjorie Ortua", nickname: "Ate Jeng", role: "part of our groom’s squad" },
-    { name: "Karl Dajalos", nickname: "Karl", role: "part of our groom’s squad" },
-    { name: "Jefferson Visaya", nickname: "Jeff", role: "part of our groom’s squad" },
-    { name: "Marridel Del Rosario", nickname: "Mads", role: "part of our groom’s squad" },
-    { name: "Danelyn Sumaylo", nickname: "Dan", role: "part of our bride’s squad" },
-    { name: "Paul Krizchan Padilla", nickname: "Krizchan", role: "part of our bride’s squad" },
-    { name: "Kathleen Claire Girang", nickname: "Kat", role: "part of our bride’s squad" },
-    { name: "Patrick Kenneth Padilla", nickname: "Kuya Kenneth", role: "part of our bride’s squad" },
-    { name: "Sheila Marey Librao", nickname: "She", role: "part of our bride’s squad" },
-    { name: "Maria Angelica Visaya", nickname: "Angge", role: "part of our bride’s squad" },
-    { name: "Mikee Soriano", nickname: "Mikes", role: "part of our bride’s squad" },
-    { name: "Iris Sia", nickname: "Iris", role: "part of our bride’s squad" },
-    { name: "Prince Yuri Madrid", nickname: "Yuri", role: "our Bible bearer" },
-    { name: "Jace Kendrei Padilla", nickname: "Ace", role: "our ring bearer" },
-    { name: "Jacine Kaliyah Padilla", nickname: "Jacine", role: "our coin bearer" },
-    { name: "Jacel Kamilah Padilla", nickname: "Jacel", role: "our flower girl" },
-    { name: "Gemma Rich Madrid", nickname: "Dudang", role: "our flower girl" },
-  ],
+  // Roles you add in the dashboard (Personal Invites → Roles), each with its own heading in the Entourage.
+  // label = heading on the site, ask = the "Will you be …?" text. e.g. { label: "Candle Sponsors", ask: "our candle sponsor" }
+  customRoles: [] as CustomRole[],
+  // No names in the code: every invite (and so the whole Entourage) comes from the "Invites" tab
+  // of the Google Sheet, loaded through the Apps Script web app (see lib/content.ts).
+  invites: [] as Invite[],
 
   invitation:
     "We invite you to join us as we receive the blessing of God on our marriage and share the joy of this beautiful beginning of our life together.",
@@ -246,7 +180,6 @@ export const defaultWedding = {
       reception: { d: "/images/reception-d.webp" },
       dresscode: { m: "/images/dresscode-m.webp", d: "/images/dresscode-d.webp" },
       entourage: { m: "/images/entourage-m.webp", d: "/images/entourage-d.webp" },
-      polaroid: { m: "/images/polaroid-m.webp" },
       rsvp: { m: "/images/rsvp-m.webp", d: "/images/rsvp-d.webp" },
       thanks: { m: "/images/thanks-m.webp", d: "/images/thanks-d.webp" },
       card: { d: "/images/loader-d.webp" },
@@ -264,19 +197,15 @@ export const defaultWedding = {
       { m: "/images/g5-m.webp", d: "/images/g6-d.webp" },
       { m: "/images/g7-m.webp", d: "/images/g8-d.webp" },
     ] as { m?: string; d?: string }[],
-    // prints scattered around the hashtag polaroid (up to 8)
-    hashCollage: [
-      "/images/c7.webp", "/images/g10-d.webp", "/images/c4.webp", "/images/c5.webp",
-      "/images/g11-m.webp", "/images/c9.webp", "/images/c8.webp", "/images/c1.webp",
-    ] as string[],
-    // handwritten captions under the hanging prints (same order as hashCollage)
-    hashCaptions: ["leap of faith", "always laughing", "you & me", "our happy place", "sunny days", "just us", "golden hour", "forever"] as string[],
     // opening-screen collage: exactly 12 prints (positions are fixed in CSS .c1 … .c12)
     collage: Array.from({ length: 12 }, (_, i) => `/images/c${i + 1}.webp`) as string[],
   },
 };
 
 export type PhotoSlot = { m?: string; d?: string };
+export type InviteStatus = "pending" | "approved" | "declined";
+export type CustomRole = { label: string; ask: string };
+export type Invite = { name: string; nickname: string; role: string; status?: InviteStatus; respondedAt?: string };
 export const photoSlotInfo = {
   hero: "Hero (top of the page)",
   savedate: "Save the Date background",
@@ -284,7 +213,6 @@ export const photoSlotInfo = {
   reception: "Reception venue",
   dresscode: "Dress Code banner",
   entourage: "Entourage banner",
-  polaroid: "Hashtag polaroid",
   rsvp: "RSVP background",
   thanks: "Thank You background",
   card: "Invitation card (inside the envelope)",

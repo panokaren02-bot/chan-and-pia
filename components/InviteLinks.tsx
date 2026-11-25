@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { slugify } from "@/lib/wedding";
+import { STATUS_LABEL, statusOf } from "@/lib/entourage";
 import { useWedding } from "./WeddingProvider";
 import { useToast, copyText } from "./useToast";
 import { IconCopy } from "./Icons";
 
-// Private helper page: one personal link per entourage member, ready to send.
+// Private helper page: one personal link per person (with their reply status), ready to send.
 export default function InviteLinks() {
   const wedding = useWedding();
   const [origin, setOrigin] = useState("");
@@ -27,7 +28,7 @@ export default function InviteLinks() {
               <li key={i.name}>
                 <div>
                   <div className="il-name">{i.nickname} <span>· {i.name}</span></div>
-                  <div className="il-role">{i.role}</div>
+                  <div className="il-role">{i.role} · <strong className={`il-status il-${statusOf(i)}`}>{STATUS_LABEL[statusOf(i)]}</strong></div>
                 </div>
                 <div className="il-actions">
                   <a className="btn btn-outline btn-sm" href={url} target="_blank" rel="noopener noreferrer">View</a>

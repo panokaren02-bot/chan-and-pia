@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { Icon } from "./icons";
 import { uploadFile } from "./upload";
 
@@ -28,12 +28,14 @@ export const Grid = ({ children, cols = 2 }: { children: React.ReactNode; cols?:
   <div className={`db-grid db-grid-${cols}`}>{children}</div>
 );
 
-type TextProps = { label: string; value: string; onChange: (v: string) => void; hint?: string; placeholder?: string; type?: string };
-export function Text({ label, value, onChange, hint, placeholder, type = "text" }: TextProps) {
+type TextProps = { label: string; value: string; onChange: (v: string) => void; hint?: string; placeholder?: string; type?: string; suggestions?: string[] };
+export function Text({ label, value, onChange, hint, placeholder, type = "text", suggestions }: TextProps) {
+  const listId = useId();
   return (
     <label className="db-field">
       <span className="db-label">{label}</span>
-      <input type={type} value={value ?? ""} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />
+      <input type={type} value={value ?? ""} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} list={suggestions?.length ? listId : undefined} />
+      {!!suggestions?.length && <datalist id={listId}>{suggestions.map((o) => <option key={o} value={o} />)}</datalist>}
       {hint && <small className="db-hint">{hint}</small>}
     </label>
   );
@@ -103,12 +105,14 @@ export type FieldDef<T> = {
   label: string;
   type?: "text" | "area" | "select" | "color" | "colors" | "photo";
   options?: { value: string; label: string }[];
+  suggestions?: string[]; // text fields: dropdown of suggested values (free text still allowed)
+  hint?: string;
   wide?: boolean;
 };
 
-export function ObjectList<T extends object>({ label, items, onChange, fields, make, addLabel = "Add", titleOf, subOf, extra, uploadsEnabled, searchable }: {
+export function ObjectList<T extends object>({ label, items, onChange, fields, make, addLabel = "Add", titleOf, subOf, badgeOf, extra, uploadsEnabled, searchable }: {
   label: string; items: T[]; onChange: (v: T[]) => void; fields: FieldDef<T>[]; make: () => T;
-  addLabel?: string; titleOf?: (it: T, i: number) => string; subOf?: (it: T, i: number) => string;
+  addLabel?: string; titleOf?: (it: T, i: number) => string; subOf?: (it: T, i: number) => string; badgeOf?: (it: T, i: number) => React.ReactNode;
   extra?: (it: T, i: number) => React.ReactNode; uploadsEnabled?: boolean; searchable?: boolean;
 }) {
   // long lists start collapsed so they're easy to scan on a phone
@@ -170,6 +174,7 @@ export function ObjectList<T extends object>({ label, items, onChange, fields, m
                     {sub && <small>{sub}</small>}
                   </span>
                 </button>
+                {badgeOf?.(it, i)}
                 <RowTools i={i} n={items.length} onMove={(d) => moveItem(i, d)} onRemove={() => removeItem(i)} />
               </div>
               {isOpen && (
@@ -190,7 +195,7 @@ export function ObjectList<T extends object>({ label, items, onChange, fields, m
                       if (f.type === "color") return <ColorField key={f.key} label={f.label} value={String(v ?? "#000000")} onChange={(x) => set(i, f.key, x)} />;
                       if (f.type === "colors") return <div key={f.key} className={cls}><ColorList label={f.label} items={(v as string[]) ?? []} onChange={(x) => set(i, f.key, x)} /></div>;
                       if (f.type === "photo") return <div key={f.key} className={cls}><PhotoPicker label={f.label} value={String(v ?? "")} onChange={(x) => set(i, f.key, x)} enabled={uploadsEnabled} keepPng /></div>;
-                      return <div key={f.key} className={cls}><Text label={f.label} value={String(v ?? "")} onChange={(x) => set(i, f.key, x)} /></div>;
+                      return <div key={f.key} className={cls}><Text label={f.label} value={String(v ?? "")} onChange={(x) => set(i, f.key, x)} suggestions={f.suggestions} hint={f.hint} /></div>;
                     })}
                   </div>
                   {extra?.(it, i)}

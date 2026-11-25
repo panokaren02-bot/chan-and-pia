@@ -666,14 +666,6 @@ h1, h2, h3, h4, p { margin: 0; }
 .btn-gold:hover { background-position: 100% 0; box-shadow: 0 18px 40px rgba(197, 170, 131, 0.45); }
 .btn-sm { padding: 8px 16px; font-size: 0.85rem; }
 
-/* polaroid print (used by the hashtag section) */
-.polaroid {
-  background: #fff; padding: 12px 12px 46px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18), 0 2px 6px rgba(0, 0, 0, 0.08);
-  transition: transform 0.6s var(--ease);
-}
-.polaroid .ph { aspect-ratio: 1.25; overflow: hidden; }
-.polaroid img { width: 100%; height: 100%; object-fit: cover; }
 
 /* ─── Venues ─── */
 .venues { display: grid; gap: 20px; max-width: 960px; margin: 0 auto; }
@@ -824,101 +816,14 @@ h1, h2, h3, h4, p { margin: 0; }
 
 @media (prefers-reduced-motion: reduce) { .ent-names li { opacity: 1; transform: none; transition: none; } }
 
-/* ─── Polaroid / hashtag ─── */
-.hash { background: var(--brown); padding: clamp(60px, 10vw, 110px) 20px; text-align: center; overflow: hidden; }
-
-/* flat-lay: printed photos scattered on burgundy linen, lit from the upper left */
-.hash { position: relative; isolation: isolate; background: #4c1a26 url("/textures/linen-burgundy.webp") 0 0 / 256px 256px; }
-.hash::before { /* soft window light + vignette */
-  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(70% 55% at 22% 12%, rgba(255, 226, 196, .16), transparent 70%),
-    radial-gradient(120% 90% at 50% 45%, transparent 50%, rgba(20, 5, 10, .55) 100%);
-}
-.hash-eyebrow { font-family: var(--font-script); font-size: clamp(2rem, 7vw, 2.8rem); color: var(--gold-soft); margin-bottom: 10px; text-shadow: 0 2px 10px rgba(0, 0, 0, .3); }
-
-.flatlay { position: relative; width: calc(100% + 40px); margin: 0 -20px; aspect-ratio: 390 / 930; }
-
-/* a printed photo: paper stock, printed image, gloss, lifted corner, layered shadows */
-.print {
-  position: absolute; margin: 0; transform: rotate(var(--r, 0deg));
-  background: #f7f3ea url("/textures/photo-paper.webp") 0 0 / 160px 160px;
-  box-shadow:
-    0 0 0 .5px rgba(0, 0, 0, .12),
-    0 1px 1px rgba(0, 0, 0, .28),
-    2px 4px 6px rgba(20, 5, 10, .22),
-    8px 16px 22px -6px rgba(20, 5, 10, .38),
-    18px 34px 44px -14px rgba(20, 5, 10, .42);
-  transition: transform .45s var(--ease), box-shadow .45s var(--ease);
-}
-.print::after { /* paper sheen + a slightly lifted lower-right corner */
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, .35), transparent 30%),
-    linear-gradient(315deg, rgba(0, 0, 0, .10), rgba(255, 255, 255, .25) 6%, transparent 14%);
-  mix-blend-mode: soft-light;
-}
-.print-photo { position: relative; overflow: hidden; background: #ddd; }
-.print-photo img { display: block; width: 100%; height: 100%; object-fit: cover; filter: var(--warm-filter) contrast(1.03); }
-.print-photo::after { /* glossy emulsion + printed edge */
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(118deg, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, .08) 100%);
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .10), inset 0 0 14px rgba(0, 0, 0, .12);
-}
-
-/* formats */
-/* borders are margins on the photo: % margins resolve against the print's own width */
-.print-instax .print-photo { margin: 5.5% 5.5% 0; aspect-ratio: .78; }
-.print-instax figcaption, .print-tag {
-  font-family: var(--font-script); color: #2c2a33; opacity: .86; mix-blend-mode: multiply; text-align: center; white-space: nowrap;
-  font-size: clamp(.95rem, 3.6vw, 1.45rem); line-height: 2.1;
-}
-.print-instax figcaption { display: block; padding: 0 4px; margin: 3% 0 5%; }
-.print-instax:not(:has(figcaption)) .print-photo { margin-bottom: 24%; }
-.print-square .print-photo { margin: 5%; aspect-ratio: 1; }
-.print-wide .print-photo { margin: 3.6%; aspect-ratio: 1.5; }
-
-.print-main { z-index: 5; }
-.print-main .print-tag { display: block; padding: 0 6px; margin: 4% 0 6%; font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: clamp(1rem, 3.8vw, 1.3rem); line-height: 1.9; color: #24151a; }
-
-@media (hover: hover) {
-  .print:hover {
-    z-index: 10; transform: rotate(var(--r, 0deg)) translate(-3px, -8px) scale(1.03);
-    box-shadow: 0 0 0 .5px rgba(0, 0, 0, .12), 0 2px 2px rgba(0, 0, 0, .2), 6px 12px 16px rgba(20, 5, 10, .25), 18px 36px 48px -8px rgba(20, 5, 10, .45), 30px 60px 70px -20px rgba(20, 5, 10, .4);
-  }
-}
-
-/* phones: a tall arrangement around the hashtag print */
-.print-main { left: 17%; top: 26.5%; width: 66%; --r: -2deg; }
-.fl1 { left: 3%;  top: 1%;   width: 38%; --r: -6deg; z-index: 2; }
-.fl2 { left: 43%; top: 4%;   width: 55%; --r: 4deg;  z-index: 1; }
-.fl3 { left: -5%; top: 19.5%; width: 33%; --r: 6deg; z-index: 1; }
-.fl4 { left: 66%; top: 18%;  width: 33%; --r: -5deg; z-index: 1; }
-.fl5 { left: -4%; top: 61%;  width: 40%; --r: -4deg; z-index: 6; }
-.fl6 { left: 61%; top: 60%;  width: 38%; --r: 6deg;  z-index: 6; }
-.fl7 { left: 3%;  top: 80%;  width: 55%; --r: 3deg;  z-index: 7; }
-.fl8 { left: 60%; top: 78%;  width: 35%; --r: -6deg; z-index: 8; }
-
-@media (min-width: 760px) {
-  .flatlay { width: min(100%, 1120px); margin: 0 auto; aspect-ratio: 1120 / 650; }
-  .print-main { left: 37%; top: 6%; width: 26%; --r: -2deg; }
-  .fl1 { left: 5%;  top: 4%;  width: 15%; --r: -7deg; }
-  .fl2 { left: 17%; top: 13%; width: 20%; --r: 4deg; }
-  .fl3 { left: 4%;  top: 52%; width: 16%; --r: 5deg; }
-  .fl4 { left: 21%; top: 47%; width: 15%; --r: -4deg; z-index: 3; }
-  .fl5 { left: 64%; top: 6%;  width: 16%; --r: 6deg; }
-  .fl6 { left: 80%; top: 3%;  width: 15%; --r: -5deg; z-index: 2; }
-  .fl7 { left: 62%; top: 52%; width: 20%; --r: -3deg; z-index: 3; }
-  .fl8 { left: 82%; top: 46%; width: 14%; --r: 7deg; z-index: 4; }
-  .print-instax figcaption { font-size: clamp(1rem, 1.5vw, 1.4rem); }
-}
-.hash .copy-hint { margin-top: clamp(24px, 4vw, 40px); }
-
-.hash-tag { font-family: var(--font-display); font-style: italic; font-weight: 600; color: var(--ink); padding-top: 14px; font-size: 1.05rem; word-break: break-word; }
-.copy-hint { margin-top: 26px; color: rgba(243, 235, 223, 0.7); font-style: italic; font-size: 0.95rem; }
-.hash .btn { margin-top: 12px; color: var(--gold-soft); border-color: rgba(197, 170, 131, 0.5); }
-
 /* ─── Gallery ─── */
+.gal-tag { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: -8px auto clamp(28px, 5vw, 44px); text-align: center; }
+.gal-tag-hint { font-family: var(--font-display); font-style: italic; font-size: .95rem; letter-spacing: .04em; color: var(--ink-soft); }
+.gal-tag-name {
+  font-family: var(--font-script); font-size: clamp(2.2rem, 9vw, 3.4rem); line-height: 1.2; color: var(--brown);
+  padding: 0 .3em; word-break: break-word;
+}
+.gal-tag .btn { margin-top: 4px; }
 .gallery-grid { columns: 2; column-gap: 12px; }
 @media (min-width: 760px) { .gallery-grid { columns: 3; column-gap: 16px; } }
 .g-item { break-inside: avoid; margin-bottom: 12px; overflow: hidden; border: 0; padding: 0; background: none; width: 100%; display: block; }
@@ -1273,10 +1178,35 @@ h1, h2, h3, h4, p { margin: 0; }
 .letter p { color: var(--ink-soft); font-size: 1.1rem; line-height: 1.9; margin-top: 16px; }
 .letter .letter-hello { font-family: var(--font-display); font-style: italic; font-size: 1.5rem; color: var(--ink); margin-top: 18px; }
 .letter .letter-big { font-family: var(--font-display); font-size: clamp(1.6rem, 6vw, 2.1rem); color: var(--brown); line-height: 1.3; }
-.letter .letter-ask { font-family: var(--font-display); font-size: clamp(1.3rem, 5vw, 1.6rem); color: var(--ink); margin-top: 28px; }
-.letter .letter-ask em { color: var(--brown); }
+.letter .letter-note { font-style: italic; color: var(--ink); }
 .letter .letter-sign { margin-top: 30px; font-style: italic; }
 .letter .letter-sign span { font-family: var(--font-script); font-size: 2.3rem; color: var(--brown); font-style: normal; }
+
+/* the question, by name */
+.letter .letter-question {
+  margin: 30px -8px 0; padding: 26px clamp(16px, 5vw, 30px) 24px; border-radius: 4px;
+  background: linear-gradient(180deg, #fbf7f0, #f6efe3); border: 1px solid var(--gold-soft);
+}
+.letter .letter-ask { margin-top: 0; font-family: var(--font-display); font-size: clamp(1.3rem, 5.2vw, 1.65rem); line-height: 1.35; color: var(--ink); }
+.letter .letter-ask em { color: var(--brown); }
+.letter .letter-name { display: block; font-family: var(--font-script); font-size: clamp(2.4rem, 10vw, 3.1rem); line-height: 1.15; color: var(--brown); margin-bottom: 4px; }
+.letter .letter-reply { margin-top: 20px; }
+.letter .letter-reply p { margin-top: 0; }
+.letter .letter-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.letter .letter-actions .btn { min-width: 190px; letter-spacing: .06em; white-space: nowrap; }
+.letter .letter-actions .btn:disabled { opacity: .6; cursor: wait; transform: none; }
+.letter .letter-confirm p { font-size: 1rem; line-height: 1.6; margin-bottom: 14px; }
+.letter .letter-thanks { display: flex; flex-direction: column; align-items: center; gap: 10px; animation: letterIn .6s var(--ease) both; }
+.letter .letter-thanks p { font-size: 1rem; line-height: 1.65; }
+.letter .letter-answer { font-family: var(--font-display); font-style: italic; font-size: 1.35rem !important; color: var(--brown) !important; }
+.letter .is-approved { border-color: #b9d3bf; background: linear-gradient(180deg, #f8fbf7, #eef5ef); }
+.letter .letter-change { margin-top: 2px; background: none; border: 0; padding: 6px; font: inherit; font-size: .88rem; color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.letter .letter-err { color: #a33; font-size: .92rem; margin-top: 10px !important; }
+@keyframes letterIn { from { opacity: 0; transform: translateY(8px); } }
+@media (max-width: 480px) {
+  .letter .letter-actions { flex-direction: column; align-items: stretch; }
+  .letter .letter-actions .btn { min-width: 0; width: 100%; }
+}
 
 /* ─── Full names in invitation ─── */
 .invite-names { font-family: var(--font-display); font-size: clamp(1.15rem, 4.2vw, 1.5rem); letter-spacing: 0.04em; color: var(--brown); margin-top: 26px; }
@@ -1294,3 +1224,15 @@ h1, h2, h3, h4, p { margin: 0; }
 .il-name span { color: var(--muted); font-size: 0.9rem; }
 .il-role { font-style: italic; color: var(--muted); font-size: 0.95rem; }
 .il-actions { display: flex; gap: 8px; }
+.il-status { font-weight: 600; font-style: normal; }
+.il-pending { color: #9a7420; }
+.il-approved { color: #2f7a47; }
+.il-declined { color: #a33a3a; }
+
+/* personal invite links: the letter's Yes/No is their RSVP, so the form and every link to it are hidden */
+.is-invite #rsvp, .is-invite a[href="#rsvp"] { display: none !important; }
+.letter .letter-sent { font-size: .95rem !important; color: #2f7a47; }
+.lm-lead { font-size: 1rem; line-height: 1.65; color: var(--ink-soft); text-align: center; margin-bottom: 14px; }
+.lm-foot { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.lm-foot .rm-submit { width: 100%; }
+.lm-later { opacity: .8; }

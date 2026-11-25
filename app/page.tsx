@@ -6,7 +6,6 @@ import SaveTheDate from "@/components/SaveTheDate";
 import Venues from "@/components/Venues";
 import DressCode from "@/components/DressCode";
 import Entourage from "@/components/Entourage";
-import Hashtag from "@/components/Hashtag";
 import Gallery from "@/components/Gallery";
 import Invitation from "@/components/Invitation";
 import Rsvp from "@/components/Rsvp";
@@ -19,6 +18,7 @@ import RevealObserver from "@/components/RevealObserver";
 import { WeddingProvider } from "@/components/WeddingProvider";
 import { getContent } from "@/lib/content";
 import { normalizeOrder, type SectionKey } from "@/lib/sections";
+import { approvedEntourage } from "@/lib/entourage";
 
 // Each movable section; the order and visibility come from the dashboard (Layout tab).
 const BLOCKS: Record<SectionKey, () => React.ReactNode> = {
@@ -27,7 +27,6 @@ const BLOCKS: Record<SectionKey, () => React.ReactNode> = {
   venues: () => <Venues />,
   dresscode: () => <DressCode />,
   entourage: () => <Entourage />,
-  hashtag: () => <Hashtag />,
   gallery: () => <Gallery />,
   invitation: () => <Invitation />,
   rsvp: () => <Rsvp />,
@@ -38,8 +37,11 @@ const BLOCKS: Record<SectionKey, () => React.ReactNode> = {
 };
 
 export default async function Page() {
-  const content = await getContent();
-  const hidden = new Set(content.layout?.hidden ?? []);
+  const loaded = await getContent();
+  const hidden = new Set(loaded.layout?.hidden ?? []);
+  // the Entourage shows only approved people; until someone says yes, drop it (and its menu link)
+  if (!Object.values(approvedEntourage(loaded.invites, loaded.customRoles)).some((l) => l.length)) hidden.add("entourage");
+  const content = { ...loaded, layout: { order: loaded.layout?.order ?? [], hidden: [...hidden] } };
   const order = normalizeOrder(content.layout?.order).filter((k) => !hidden.has(k));
   return (
     <WeddingProvider value={content}>

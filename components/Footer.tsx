@@ -1,5 +1,5 @@
 "use client";
-import { useWedding } from "./WeddingProvider";
+import { useHiddenSections, useWedding } from "./WeddingProvider";
 import Monogram from "./Monogram";
 import { IconUp } from "./Icons";
 import { menuSections } from "@/lib/sections";
@@ -12,7 +12,8 @@ const STUDIO = { name: "Wedding Invitation Naga", url: "https://www.facebook.com
 export default function Footer() {
   const wedding = useWedding();
   const year = new Date(wedding.dateISO).getFullYear();
-  const links = menuSections(wedding.layout?.order, wedding.layout?.hidden).map((s) => [SHORT[s.menu] ?? s.menu, s.anchor]);
+  const hidden = useHiddenSections();
+  const links = menuSections(wedding.layout?.order, hidden).map((s) => [SHORT[s.menu] ?? s.menu, s.anchor]);
   return (
     <footer className="footer">
       <div className="footer-main">
