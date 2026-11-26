@@ -1,5 +1,5 @@
 "use client";
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "./icons";
 import { uploadFile } from "./upload";
 
@@ -41,11 +41,32 @@ export function Text({ label, value, onChange, hint, placeholder, type = "text",
   );
 }
 
+/** A textarea that grows with its text, so nothing is hidden behind a scrollbar (narrow phone screens especially). */
+export function AutoTextarea({ rows = 2, value, ...rest }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { value: string }) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const fit = () => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight + (el.offsetHeight - el.clientHeight)}px`;
+  };
+  useLayoutEffect(fit, [value]);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    let w = el.clientWidth;
+    const ro = new ResizeObserver(() => { if (el.clientWidth !== w) { w = el.clientWidth; fit(); } });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  return <textarea ref={ref} rows={rows} value={value} {...rest} />;
+}
+
 export function Area({ label, value, onChange, hint, rows = 3 }: TextProps & { rows?: number }) {
   return (
     <label className="db-field">
       <span className="db-label">{label}</span>
-      <textarea rows={rows} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
+      <AutoTextarea rows={rows} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />
       {hint && <small className="db-hint">{hint}</small>}
     </label>
   );
@@ -89,7 +110,7 @@ export function StringList({ label, items, onChange, addLabel = "Add", placehold
           <div key={i} className="db-list-row">
             <span className="db-num">{i + 1}</span>
             {multiline
-              ? <textarea rows={2} value={it} placeholder={placeholder} onChange={(e) => onChange(items.map((x, k) => (k === i ? e.target.value : x)))} />
+              ? <AutoTextarea rows={2} value={it} placeholder={placeholder} onChange={(e) => onChange(items.map((x, k) => (k === i ? e.target.value : x)))} />
               : <input value={it} placeholder={placeholder} onChange={(e) => onChange(items.map((x, k) => (k === i ? e.target.value : x)))} />}
             <RowTools i={i} n={items.length} onMove={(d) => onChange(move(items, i, d))} onRemove={() => onChange(items.filter((_, k) => k !== i))} />
           </div>

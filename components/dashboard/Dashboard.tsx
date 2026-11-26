@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { defaultWedding, photoSlotInfo, slugify, type PhotoSlotKey, type Wedding } from "@/lib/wedding";
 import { Area, Card, Grid, NumberField, ObjectList, PhotoGrid, PhotoPicker, Section, StringList, Text } from "./fields";
 import { Icon } from "./icons";
@@ -24,24 +24,16 @@ const fromLocal = (v: string) => `${v}:00+08:00`;
 const labelFor = (v: string) =>
   new Date(`${v}:00+08:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "Asia/Manila" });
 
-export default function Dashboard({ initial, connected, invitesSource }: { initial: Wedding; connected: boolean; invitesSource?: InvitesSource }) {
+export default function Dashboard({ initial, connected, invitesSource, sheetUrl }: { initial: Wedding; connected: boolean; invitesSource?: InvitesSource; sheetUrl?: string }) {
   const [c, setC] = useState<Wedding>(initial);
   const [saved, setSaved] = useState(() => JSON.stringify(initial));
   const [tab, setTab] = useState<Tab>("couple");
   const [status, setStatus] = useState<{ kind: "idle" | "saving" | "ok" | "err"; msg?: string }>({ kind: "idle" });
   const [menu, setMenu] = useState(false);
-  const chips = useRef<HTMLElement>(null);
   const dirty = useMemo(() => JSON.stringify(c) !== saved, [c, saved]);
 
   const go = (t: Tab) => { setTab(t); setMenu(false); window.scrollTo({ top: 0 }); };
   const discard = () => { if (window.confirm("Discard all unsaved changes?")) { setC(JSON.parse(saved)); setStatus({ kind: "idle" }); } };
-
-  // keep the active section chip visible in the mobile strip
-  useEffect(() => {
-    const el = chips.current?.querySelector<HTMLElement>(".on");
-    const box = chips.current;
-    if (el && box) box.scrollTo({ left: el.offsetLeft - (box.clientWidth - el.offsetWidth) / 2, behavior: "smooth" });
-  }, [tab]);
 
   // lock page scroll + Esc closes while the sections sheet is open
   useEffect(() => {
@@ -126,22 +118,20 @@ export default function Dashboard({ initial, connected, invitesSource }: { initi
             <span className={`db-status db-status-${dirty ? "dirty" : status.kind === "err" ? "err" : "ok"}`}>
               {status.kind === "saving" ? "Saving…" : dirty ? "Unsaved changes" : "All changes saved"}
             </span>
+            {sheetUrl && (
+              <a className="db-btn db-btn-ghost db-icon-btn db-desk" href={sheetUrl} target="_blank" rel="noopener noreferrer" aria-label="Open Google Sheet">
+                <Icon name="sheet" /><span>Google Sheet</span>
+              </a>
+            )}
             <a className="db-btn db-btn-ghost db-icon-btn" href="/" target="_blank" rel="noopener noreferrer" aria-label="View site">
               <Icon name="external" /><span>View site</span>
             </a>
             <button className="db-btn db-btn-ghost db-desk" onClick={logout}><Icon name="logout" />Log out</button>
-            <button className="db-btn db-btn-ghost db-icon-btn db-mob" onClick={() => setMenu(true)} aria-label="All sections" aria-expanded={menu}>
-              <Icon name="menu" />
+            <button className="db-btn db-menu-btn db-mob" onClick={() => setMenu(true)} aria-label={`Sections, now on ${NAV[idx][1]}`} aria-expanded={menu}>
+              <Icon name="menu" /><b>{SHORT[tab] ?? NAV[idx][1]}</b>
             </button>
           </div>
         </div>
-        <nav className="db-chips" ref={chips} aria-label="Sections">
-          {NAV.map(([id, label]) => (
-            <button key={id} className={tab === id ? "on" : ""} onClick={() => go(id)}>
-              <Icon name={id} size={16} />{SHORT[id] ?? label}
-            </button>
-          ))}
-        </nav>
       </header>
 
       {!connected && (
@@ -444,6 +434,7 @@ export default function Dashboard({ initial, connected, invitesSource }: { initi
             <div className="db-sheet-foot">
               <a className="db-btn" href="/" target="_blank" rel="noopener noreferrer"><Icon name="external" />View site</a>
               <a className="db-btn" href="/invites" target="_blank" rel="noopener noreferrer"><Icon name="invites" />Invite links</a>
+              {sheetUrl && <a className="db-btn" href={sheetUrl} target="_blank" rel="noopener noreferrer"><Icon name="sheet" />Google Sheet</a>}
               <button className="db-btn" onClick={logout}><Icon name="logout" />Log out</button>
             </div>
           </div>

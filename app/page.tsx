@@ -19,6 +19,14 @@ import { WeddingProvider } from "@/components/WeddingProvider";
 import { getContent } from "@/lib/content";
 import { normalizeOrder, type SectionKey } from "@/lib/sections";
 import { approvedEntourage } from "@/lib/entourage";
+import { shareMeta } from "@/lib/seo";
+import type { Metadata } from "next";
+
+// A personal link (?to=<slug>) gets its own preview: "Tito Orly, Chan & Pia have a special question for you".
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ to?: string | string[] }> }): Promise<Metadata> {
+  const to = (await searchParams).to;
+  return shareMeta(await getContent(), Array.isArray(to) ? to[0] : to);
+}
 
 // Each movable section; the order and visibility come from the dashboard (Layout tab).
 const BLOCKS: Record<SectionKey, () => React.ReactNode> = {
