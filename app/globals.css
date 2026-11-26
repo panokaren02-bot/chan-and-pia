@@ -535,7 +535,7 @@ h1, h2, h3, h4, p { margin: 0; }
 .hero-date::before { content: ""; position: absolute; top: 0; left: 50%; width: 48px; height: 1px; translate: -50% 0; background: var(--gold-soft); }
 .hero-meta { margin-top: 8px; font-size: clamp(.78rem, 3.3vw, .86rem); letter-spacing: .16em; line-height: 1.6; text-transform: uppercase; color: #eadcc4; }
 .hero-meta span { color: var(--gold-soft); margin: 0 .4em; }
-.hero-eyebrow, .hero-meta, .countdown .lbl, .hero-link { text-shadow: 0 1px 3px rgba(0, 0, 0, .45), 0 1px 18px rgba(0, 0, 0, .35); }
+.hero-eyebrow, .hero-meta, .countdown .lbl { text-shadow: 0 1px 3px rgba(0, 0, 0, .45), 0 1px 18px rgba(0, 0, 0, .35); }
 
 .countdown { display: flex; justify-content: center; margin: 30px auto 0; }
 .countdown .unit { position: relative; min-width: 0; width: clamp(68px, 19vw, 96px); }
@@ -550,8 +550,6 @@ h1, h2, h3, h4, p { margin: 0; }
   font-size: .8rem; letter-spacing: .26em; text-transform: uppercase; transition: background .4s var(--ease), color .4s var(--ease), border-color .4s;
 }
 .hero-btn:hover { background: #f5f0e8; border-color: #f5f0e8; color: var(--brown); }
-.hero-link { font-family: var(--font-display); font-style: italic; font-size: 1.08rem; color: #eadcc4; text-decoration: none; border-bottom: 1px solid rgba(234, 220, 196, .4); padding-bottom: 2px; transition: border-color .3s; }
-.hero-link:hover { border-color: #eadcc4; }
 
 /* slide indicator */
 .hero-dots { position: absolute; z-index: 2; bottom: 24px; left: 50%; translate: -50% 0; display: flex; gap: 8px; opacity: 0; transition: opacity 1s 2s; }

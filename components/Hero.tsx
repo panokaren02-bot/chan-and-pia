@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useWedding, useHiddenSections } from "./WeddingProvider";
-import { googleCalendarUrl, weddingDate, weekdayOf } from "@/lib/date";
+import { weddingDate, weekdayOf } from "@/lib/date";
 import Monogram from "./Monogram";
 
 const SLIDE_MS = 6500;
@@ -100,10 +100,11 @@ export default function Hero() {
           </div>
         )}
 
-        <div className="hero-cta">
-          {rsvpOn && <a className="hero-btn" href="#rsvp">Kindly RSVP</a>}
-          <a className="hero-link" href={googleCalendarUrl(wedding)} target="_blank" rel="noopener noreferrer">Add to calendar</a>
-        </div>
+        {rsvpOn && (
+          <div className="hero-cta">
+            <a className="hero-btn" href="#rsvp">Kindly RSVP</a>
+          </div>
+        )}
       </div>
 
       {slides.length > 1 && (
