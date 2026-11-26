@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useWedding, useHiddenSections } from "./WeddingProvider";
 import { googleCalendarUrl, weddingDate, weekdayOf } from "@/lib/date";
-import { findInvite } from "@/lib/wedding";
 import Monogram from "./Monogram";
 
 const SLIDE_MS = 6500;
@@ -18,7 +17,6 @@ export default function Hero() {
   const ref = useRef<HTMLElement>(null);
   const [t, setT] = useState<ReturnType<typeof diff> | null>(null);
   const [play, setPlay] = useState(false);
-  const [guest, setGuest] = useState<string>();
   const [slide, setSlide] = useState(0);
 
   // slideshow photos; falls back to the single hero photo
@@ -30,10 +28,6 @@ export default function Hero() {
     setT(diff(target));
     const id = setInterval(() => setT(diff(target)), 1000);
     return () => clearInterval(id);
-  }, [wedding]);
-
-  useEffect(() => {
-    setGuest(findInvite(wedding, new URLSearchParams(window.location.search).get("to"))?.nickname);
   }, [wedding]);
 
   // Start the entrance once the envelope intro has finished and the page unlocks.
@@ -86,8 +80,7 @@ export default function Hero() {
       <div className="shade" />
 
       <div className="hero-inner">
-        {guest && <p className="hero-dear">Dear {guest},</p>}
-        <p className="hero-eyebrow">We&rsquo;re getting married</p>
+        <p className="hero-eyebrow">We&rsquo;re getting married!</p>
         <Monogram />
         <h1>{wedding.groom} <span className="amp">&amp;</span> {wedding.bride}</h1>
 

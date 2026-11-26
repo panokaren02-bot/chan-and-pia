@@ -369,7 +369,7 @@ function onEdit(e) {
   rows.forEach(function (r) { if (String(r[0]).trim()) syncRsvp(String(r[0]).trim(), toStatus(r[3])); });
 }
 
-/** Public: after saying yes, the invitee leaves a message. It goes on their RSVP row, so it shows on the wishes wall. */
+/** Public: after answering (yes or no), the invitee leaves a message. It goes on their RSVP row, so it shows on the wishes wall. */
 function inviteMessage(d) {
   var slug = slugify(d.to);
   var message = String(d.message || '').trim().slice(0, 1000);
@@ -377,11 +377,17 @@ function inviteMessage(d) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    var name = '';
-    (readInvites() || []).forEach(function (i) { if (slugify(i.name) === slug) name = i.name; });
-    if (!name) return { ok: false, error: 'Invite not found' };
-    syncRsvp(name, 'approved'); // make sure their guest-list row exists
+    var inv = null;
+    (readInvites() || []).forEach(function (i) { if (slugify(i.name) === slug) inv = i; });
+    if (!inv) return { ok: false, error: 'Invite not found' };
     var t = rsvpSheet(), row = rsvpRowFor(t, slug);
+    if (!row) {
+      // make sure they have a row to hold the message, without changing their answer:
+      // a decline still gets a row (Attending: no) so the message reaches the wishes wall
+      if (inv.status === 'declined') rsvpAppend({ name: inv.name, attending: 'no', guests: 0, message: '', link: slug });
+      else syncRsvp(inv.name, 'approved');
+      row = rsvpRowFor(t, slug);
+    }
     if (!row) return { ok: false, error: 'Invite not found' };
     t.sh.getRange(row, t.col.message).setValue(safeCell(message));
     return { ok: true };

@@ -313,7 +313,7 @@ export default function Dashboard({ initial, connected, invitesSource }: { initi
               <Card title="Letter" aside={
                 <button className="db-btn db-btn-ghost" onClick={() => window.confirm("Replace the letter paragraphs and role paragraphs with the suggested wording?") &&
                   up((d) => { d.letter.lines = [...defaultWedding.letter.lines]; d.letter.notes = { ...defaultWedding.letter.notes }; })}>Use suggested wording</button>}>
-                <p className="db-hint">The letter opens with “Dear {"{nickname}"},”, then these paragraphs, then a paragraph for their role, then the question by name: “Tito Orly, will you be our Ninong?” with Yes / No buttons.</p>
+                <p className="db-hint">The letter opens with “Dear {"{nickname}"},”, then these paragraphs, then a paragraph for their role, then the question: “Will you be our Ninong?” with Yes / No buttons.</p>
                 <StringList label="Paragraphs" multiline items={c.letter.lines} onChange={(v) => up((d) => { d.letter.lines = v; })} addLabel="Add paragraph" />
                 <div className="db-grid db-grid-2">
                   {([["sponsors", "For ninongs & ninangs"], ["honor", "For best man & maid of honor"], ["squad", "For the groom’s & bride’s squads"], ["little", "For bearers & flower girls"]] as const).map(([k, label]) => (

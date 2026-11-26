@@ -17,7 +17,7 @@ export default function PersonalLetter() {
   const wedding = useWedding();
   const [invite, setInvite] = useState<Invite>();
   const [busy, setBusy] = useState(false);
-  const [confirmNo, setConfirmNo] = useState(false);
+  const [saving, setSaving] = useState<"approved" | "declined">();
   const [err, setErr] = useState("");
   const [msgOpen, setMsgOpen] = useState(false);
   const [msgSent, setMsgSent] = useState(false);
@@ -39,13 +39,12 @@ export default function PersonalLetter() {
   const showDress = !(wedding.layout?.hidden ?? []).includes("dresscode");
 
   const answer = async (a: "approved" | "declined") => {
-    setBusy(true); setErr("");
+    setBusy(true); setSaving(a); setErr("");
     try {
       const res = await fetch("/api/invite", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to: slugify(invite.name), answer: a }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) throw new Error(data.error || "We couldn’t save your answer. Please try again.");
       setInvite({ ...invite, status: a, respondedAt: data.respondedAt });
-      setConfirmNo(false);
       // a yes: invite them to leave a few words for the couple (once the thank-you has settled in)
       if (a === "approved" && !msgSent) setTimeout(() => setMsgOpen(true), 1100);
     } catch (e) {
@@ -64,26 +63,17 @@ export default function PersonalLetter() {
         {note && <p className="letter-note">{note}</p>}
 
         <div className={`letter-question is-${status}`}>
-          <p className="letter-ask">
-            <span className="letter-name">{nick},</span>
-            will you be <em>{invite.role}</em>?
-          </p>
+          {status === "pending" && (
+            <p className="letter-ask">
+              Will you be <em>{invite.role}</em>?
+            </p>
+          )}
 
           <div className="letter-reply" aria-live="polite">
-            {status === "pending" && !confirmNo && (
+            {status === "pending" && (
               <div className="letter-actions">
-                <button className="btn btn-gold" disabled={busy} onClick={() => answer("approved")}>{busy ? "Saving…" : "Yes, I’d be honored"}</button>
-                <button className="btn btn-outline" disabled={busy} onClick={() => setConfirmNo(true)}>Sorry, I can’t</button>
-              </div>
-            )}
-
-            {status === "pending" && confirmNo && (
-              <div className="letter-confirm">
-                <p>Are you sure, {nick}? We’ll let {wedding.groom} &amp; {wedding.bride} know you can’t be {invite.role}.</p>
-                <div className="letter-actions">
-                  <button className="btn btn-outline" disabled={busy} onClick={() => answer("declined")}>{busy ? "Saving…" : "Yes, I can’t make it"}</button>
-                  <button className="btn btn-gold" disabled={busy} onClick={() => setConfirmNo(false)}>Go back</button>
-                </div>
+                <button className="btn btn-gold" disabled={busy} onClick={() => answer("approved")}>{busy && saving === "approved" ? "Saving…" : "Yes, I’d be honored"}</button>
+                <button className="btn btn-outline" disabled={busy} onClick={() => answer("declined")}>{busy && saving === "declined" ? "Saving…" : "Sorry, I can’t"}</button>
               </div>
             )}
 
@@ -104,6 +94,14 @@ export default function PersonalLetter() {
               <div className="letter-thanks">
                 <p className="letter-answer">We understand, {nick}.</p>
                 <p>Thank you for letting us know. You will always be part of our story.</p>
+                <div className="letter-encourage">
+                  {msgSent
+                    ? <p className="letter-sent">✓ Your message is on its way to {wedding.groom} &amp; {wedding.bride}.</p>
+                    : <>
+                        <p>Even if you can’t be there, a few words from you would mean the world to us.</p>
+                        <button className="btn btn-gold btn-sm" onClick={() => setMsgOpen(true)}>Send us your wishes</button>
+                      </>}
+                </div>
                 <button className="letter-change" disabled={busy} onClick={() => answer("approved")}>Changed your mind? Say yes</button>
               </div>
             )}
@@ -111,7 +109,7 @@ export default function PersonalLetter() {
           </div>
         </div>
 
-        {msgOpen && <LetterMessage invite={invite} nick={nick} onClose={() => setMsgOpen(false)} onSent={() => setMsgSent(true)} />}
+        {msgOpen && <LetterMessage invite={invite} nick={nick} declined={status === "declined"} onClose={() => setMsgOpen(false)} onSent={() => setMsgSent(true)} />}
 
         <p className="letter-sign">{wedding.letter.signoff}<br /><span>{wedding.groom} &amp; {wedding.bride}</span></p>
       </article>

@@ -7,9 +7,9 @@ import Monogram from "./Monogram";
 
 const MAX_MSG = 500;
 
-/** Opens after someone says yes on their personal letter: a nudge to leave a few words for the couple. */
-export default function LetterMessage({ invite, nick, onClose, onSent }: {
-  invite: Invite; nick: string; onClose: () => void; onSent: () => void;
+/** Opens after someone answers their personal letter (yes, or no from the declined card): a nudge to leave a few words for the couple. */
+export default function LetterMessage({ invite, nick, declined = false, onClose, onSent }: {
+  invite: Invite; nick: string; declined?: boolean; onClose: () => void; onSent: () => void;
 }) {
   const wedding = useWedding();
   const wallOn = !useHiddenSections().includes("wishes") && wedding.rsvp.showWishes !== false;
@@ -47,7 +47,7 @@ export default function LetterMessage({ invite, nick, onClose, onSent }: {
 
   return createPortal(
     <div className="rm" role="dialog" aria-modal="true" aria-labelledby="lm-title" onClick={onClose}>
-      <div className="rm-card" onClick={(e) => e.stopPropagation()}>
+      <div className="rm-card lm" onClick={(e) => e.stopPropagation()}>
         <span className="rm-frame" aria-hidden />
         <button className="rm-close" onClick={onClose} aria-label="Close">
           <svg viewBox="0 0 24 24" aria-hidden><path d="M6 6l12 12M18 6 6 18" /></svg>
@@ -66,12 +66,13 @@ export default function LetterMessage({ invite, nick, onClose, onSent }: {
             <header className="rm-head">
               <Monogram />
               <h3 id="lm-title" className="rm-title">A note for {wedding.groom} &amp; {wedding.bride}?</h3>
-              <p className="rm-eyebrow">You’re on our guest list</p>
+              <p className="rm-eyebrow">{declined ? "Always part of our story" : "You’re on our guest list"}</p>
             </header>
             <div className="rm-body">
               <p className="lm-lead">
-                Thank you for saying yes, {nick}! While you’re here, would you leave a few words for the couple?
-                A blessing, a favorite memory, or a bit of marriage advice will do.
+                {declined
+                  ? <>We’ll miss you, {nick}, but your words can still be part of our day. A blessing, a favorite memory, or a bit of marriage advice will do.</>
+                  : <>Thank you for saying yes, {nick}! While you’re here, would you leave a few words for the couple? A blessing, a favorite memory, or a bit of marriage advice will do.</>}
               </p>
               <label className="rm-field">
                 <span className="rm-label">Your message</span>

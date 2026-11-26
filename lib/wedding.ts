@@ -95,13 +95,13 @@ export const defaultWedding = {
   // (role → group) and shows only Approved people.
   letter: {
     lines: [
-      "We’re getting married!",
+      "Yes, you read that right!",
       "As we count down the days to saying “I do,” we keep thinking about the people who have loved us, guided us and cheered us on — the ones we want closest to us when that moment comes.",
       "You are one of them.",
     ],
     // a short paragraph for each kind of role, shown just before the question ({nickname} works here too)
     notes: {
-      sponsors: "Your faith, your wisdom and the way you live out your own marriage have inspired us. We would be honored to have you stand with us before God as one of our principal sponsors, and to keep guiding us as we build our home together.",
+      sponsors: "Our day would not be complete without you walking down the aisle with us.",
       honor: "You have been there through every chapter of our story. There is no one we would rather have standing right beside us when we say “I do.”",
       squad: "You have filled our lives with laughter, support and so many memories. Our day would not be complete without you walking down the aisle with us.",
       little: "We have a very special job for you on our wedding day, and we can’t wait to see you walk down the aisle!",
