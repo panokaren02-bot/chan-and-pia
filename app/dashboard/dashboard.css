@@ -340,3 +340,30 @@
 
 .db-music-default { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--db-line); }
 .db-music-default .db-hint { flex: 1; min-width: 200px; margin: 0; }
+
+/* ─── seating: table column, per-table summary, door QR ─── */
+.db-table-input { width: 120px; height: 34px; padding: 0 10px; border: 1px solid var(--db-line); border-radius: 8px; background: #fffdf9; font: 15px var(--font-body); color: var(--db-ink); }
+.db-table-input:focus { outline: none; border-color: var(--db-gold); box-shadow: 0 0 0 3px rgba(197,170,131,.25); }
+.db-table-input::placeholder { color: #b3a79b; font-style: italic; }
+.db-seating { display: grid; gap: 16px; margin-top: 18px; }
+.db-seat-qr { display: flex; gap: 20px; align-items: center; }
+.db-seat-qr > svg { flex-shrink: 0; width: 150px; height: 150px; border: 1px solid var(--db-line); border-radius: 10px; }
+.db-seat-qr h3, .db-seat-head { font-family: var(--font-display); font-weight: 500; font-size: 1.15rem; color: var(--db-brand); }
+.db-seat-qr code { display: inline-block; margin: 8px 0 12px; font-size: .85rem; overflow-wrap: anywhere; }
+.db-seat-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.db-seat-head small { margin-left: 8px; font-family: var(--font-body); font-size: .82rem; color: var(--db-soft); }
+.db-seat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; margin-top: 12px; }
+.db-seat-table { padding: 12px 14px; border: 1px solid var(--db-line); border-radius: 10px; background: #fdfcf9; }
+.db-seat-table b { font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; color: var(--db-brand); }
+.db-seat-table small { display: block; color: var(--db-soft); font-size: .8rem; }
+.db-seat-table ul { margin: 8px 0 0; padding-left: 18px; font-size: .9rem; line-height: 1.5; }
+.db-seat-un { margin-top: 12px; }
+@media (max-width: 640px) {
+  .db-td-table { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; }
+  .db-td-table::before { content: attr(data-label) ": "; color: #a0948a; font-size: .82rem; }
+  .db-table-input { flex: 1; height: 42px; font-size: 16px; }
+  .db-seat-qr { flex-direction: column; text-align: center; }
+  .db-seat-qr > svg { width: 180px; height: 180px; }
+  .db-seat-actions { justify-content: center; }
+  .db-seat-actions .db-btn { flex: 1; min-height: 44px; }
+}

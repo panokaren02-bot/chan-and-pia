@@ -392,6 +392,12 @@ export default function Dashboard({ initial, connected, invitesSource, sheetUrl 
                 const h = new Set(d.rsvp.hiddenWishes ?? []);
                 if (h.has(id)) h.delete(id); else h.add(id);
                 d.rsvp.hiddenWishes = [...h];
+              })}
+              tables={c.seating?.tables ?? {}} couple={`${c.groom} & ${c.bride}`}
+              onSetTable={(key, table) => up((d) => {
+                const t = { ...(d.seating?.tables ?? {}) };
+                if (table.trim()) t[key] = table; else delete t[key];
+                d.seating = { ...defaultWedding.seating, ...d.seating, tables: t };
               })} />
           )}
 

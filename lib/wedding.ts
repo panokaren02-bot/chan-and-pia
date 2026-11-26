@@ -132,6 +132,13 @@ export const defaultWedding = {
     hiddenWishes: [] as string[], // submittedAt of messages hidden from the dashboard
   },
 
+  // Reception seating, set in the dashboard (RSVP Responses). Guests look themselves up at /table
+  // (the QR code at the venue door). Keyed by the guest's name, slugified, so a re-sent RSVP keeps its table.
+  seating: {
+    tables: {} as Record<string, string>,
+    note: "Our ushers will be happy to help you find your seat.",
+  },
+
   reminders: {
     dos: [
       "Please arrive early and be seated before the ceremony begins.",

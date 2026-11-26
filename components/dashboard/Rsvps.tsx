@@ -1,6 +1,8 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { Section } from "./fields";
+import { slugify } from "@/lib/wedding";
+import Seating from "./Seating";
 
 type Row = { row?: number; submittedAt: string; name: string; attending: string; guests: number; message: string; guestLink: string };
 
@@ -8,10 +10,13 @@ const REFRESH_MS = 60_000;
 const yesNo = (v: string) => { const t = String(v || "").trim().toLowerCase(); return /^(y|yes|attending|accept)/.test(t) ? "yes" : /^(n|no|not|decline)/.test(t) ? "no" : t; };
 const time = (s: string) => { const t = Date.parse(s); return Number.isNaN(t) ? 0 : t; };
 
-export default function Rsvps({ connected, hidden = [], onToggleHidden }: { connected: boolean; hidden?: string[]; onToggleHidden?: (id: string) => void }) {
+export default function Rsvps({ connected, hidden = [], onToggleHidden, tables = {}, onSetTable, couple = "" }: {
+  connected: boolean; hidden?: string[]; onToggleHidden?: (id: string) => void;
+  tables?: Record<string, string>; onSetTable?: (key: string, table: string) => void; couple?: string;
+}) {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [err, setErr] = useState("");
-  const [filter, setFilter] = useState<"all" | "yes" | "no">("all");
+  const [filter, setFilter] = useState<"all" | "yes" | "no" | "unseated">("all");
   const [loading, setLoading] = useState(false);
   const [updated, setUpdated] = useState<Date | null>(null);
 
@@ -41,19 +46,21 @@ export default function Rsvps({ connected, hidden = [], onToggleHidden }: { conn
 
   const yes = rows?.filter((r) => r.attending === "yes") ?? [];
   const no = rows?.filter((r) => r.attending === "no") ?? [];
-  const shown = (rows ?? []).filter((r) => filter === "all" || r.attending === filter);
+  const tableOf = (r: Row) => (tables[slugify(r.name)] ?? "").trim();
+  const shown = (rows ?? []).filter((r) => filter === "all" || (filter === "unseated" ? r.attending === "yes" && !tableOf(r) : r.attending === filter));
+  const tableNames = [...new Set(Object.values(tables).map((t) => t.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   const csv = () => {
     const q = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-    const lines = [["Submitted", "Name", "Attending", "Guests", "Message", "Personal link"].map(q).join(",")]
-      .concat((rows ?? []).map((r) => [r.submittedAt, r.name, r.attending, r.guests, r.message, r.guestLink].map(q).join(",")));
+    const lines = [["Submitted", "Name", "Attending", "Guests", "Table", "Message", "Personal link"].map(q).join(",")]
+      .concat((rows ?? []).map((r) => [r.submittedAt, r.name, r.attending, r.guests, tableOf(r), r.message, r.guestLink].map(q).join(",")));
     const url = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" }));
     Object.assign(document.createElement("a"), { href: url, download: "rsvps.csv" }).click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   return (
-    <Section id="responses" title="RSVP Responses" desc="Everything in the “RSVP” tab of your Google Sheet: replies from the RSVP form, people who said yes on their personal invite, and rows you add or edit in the sheet yourself. Messages appear on the site's wishes wall; hide any you don't want shown, then Save.">
+    <Section id="responses" title="RSVP Responses" desc="Everything in the “RSVP” tab of your Google Sheet: replies from the RSVP form, people who said yes on their personal invite, and rows you add or edit in the sheet yourself. Messages appear on the site's wishes wall; hide any you don't want shown. Assign reception tables in the Table column, then Save. Guests find theirs at /table.">
       {!connected ? <p className="db-hint">Connect Google Apps Script to see responses.</p> : (
         <>
           <div className="db-stats">
@@ -64,8 +71,8 @@ export default function Rsvps({ connected, hidden = [], onToggleHidden }: { conn
           </div>
           <div className="db-toolbar">
             <div className="db-seg">
-              {(["all", "yes", "no"] as const).map((f) => (
-                <button key={f} className={filter === f ? "on" : ""} onClick={() => setFilter(f)}>{f === "all" ? "All" : f === "yes" ? "Attending" : "Declined"}</button>
+              {(["all", "yes", "unseated", "no"] as const).map((f) => (
+                <button key={f} className={filter === f ? "on" : ""} onClick={() => setFilter(f)}>{f === "all" ? "All" : f === "yes" ? "Attending" : f === "unseated" ? "No table" : "Declined"}</button>
               ))}
             </div>
             <span style={{ flex: 1 }} />
@@ -78,13 +85,19 @@ export default function Rsvps({ connected, hidden = [], onToggleHidden }: { conn
           {!!shown.length && (
             <div className="db-table-wrap">
               <table className="db-table">
-                <thead><tr><th>Name</th><th>Reply</th><th>Guests</th><th>Message</th><th>Received</th><th>Wishes wall</th></tr></thead>
+                <thead><tr><th>Name</th><th>Reply</th><th>Guests</th><th>Table</th><th>Message</th><th>Received</th><th>Wishes wall</th></tr></thead>
                 <tbody>
                   {shown.map((r, i) => (
                     <tr key={`${r.row}-${i}`}>
                       <td className="db-td-name">{r.name || <em>(no name)</em>}<small>{[r.guestLink && `personal invite · ${r.guestLink}`, r.row && `sheet row ${r.row}`].filter(Boolean).join(" · ")}</small></td>
                       <td className="db-td-reply"><span className={`db-pill db-pill-${r.attending === "yes" || r.attending === "no" ? r.attending : "pending"}`}>{r.attending === "yes" ? "Attending" : r.attending === "no" ? "Declined" : r.attending || "No reply"}</span></td>
                       <td className="db-td-guests" data-label="Guests">{r.attending === "yes" ? r.guests : "–"}</td>
+                      <td className="db-td-table" data-label="Table">
+                        {r.attending === "yes" && r.name ? (
+                          <input className="db-table-input" list="db-table-names" value={tables[slugify(r.name)] ?? ""} placeholder="Assign…"
+                            aria-label={`Table for ${r.name}`} onChange={(e) => onSetTable?.(slugify(r.name), e.target.value)} />
+                        ) : "–"}
+                      </td>
                       <td className="db-msg" data-label="Message">{r.message || "—"}</td>
                       <td className="db-td-date">{time(r.submittedAt) ? new Date(r.submittedAt).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—"}</td>
                       <td className="db-td-wall">
@@ -98,8 +111,10 @@ export default function Rsvps({ connected, hidden = [], onToggleHidden }: { conn
                   ))}
                 </tbody>
               </table>
+              <datalist id="db-table-names">{tableNames.map((t) => <option key={t} value={t} />)}</datalist>
             </div>
           )}
+          {rows && <Seating rows={rows} tables={tables} couple={couple} origin={typeof window !== "undefined" ? window.location.origin : ""} />}
         </>
       )}
     </Section>

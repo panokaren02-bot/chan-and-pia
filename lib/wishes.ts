@@ -5,10 +5,10 @@ import { getContent } from "./content";
 export const WISHES_TAG = "wishes";
 export type Wish = { id: string; name: string; message: string };
 
-type Row = { submittedAt: string; name: string; message: string };
+type Row = { submittedAt: string; name: string; message: string; attending?: string; guests?: number };
 
 // RSVP rows are read with the admin secret on the server; only first name + initial and the message leave it.
-const loadRows = unstable_cache(
+export const loadRows = unstable_cache(
   async (): Promise<Row[]> => {
     const res = await scriptPost("rsvps");
     return res.ok && Array.isArray(res.rows) ? (res.rows as Row[]) : [];

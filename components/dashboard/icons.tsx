@@ -29,6 +29,7 @@ const P: Record<string, React.ReactNode> = {
   check: <><path d="m5 12 5 5 9-10" /></>,
   up: <><path d="m6 15 6-6 6 6" /></>,
   down: <><path d="m6 9 6 6 6-6" /></>,
+  download: <><path d="M12 4v11m-5-5 5 5 5-5M5 20h14" /></>,
   trash: <><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" /></>,
   replace: <><path d="M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3M18 3v4h-4M6 21v-4h4" /></>,
   left: <><path d="m15 6-6 6 6 6" /></>,
