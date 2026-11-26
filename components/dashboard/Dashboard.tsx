@@ -376,6 +376,12 @@ export default function Dashboard({ initial, connected, invitesSource, sheetUrl 
               <Card>
                 <PhotoPicker label="Song (MP3 or M4A, up to 4 MB)" audio accept="audio/mpeg,audio/mp4,audio/x-m4a,.mp3,.m4a" value={c.music} enabled={connected}
                   onChange={(v) => up((d) => { d.music = v; })} hint="TikTok/YouTube links can't be played on the site — download the song as an MP3 first." />
+                {c.music !== defaultWedding.music && (
+                  <div className="db-music-default">
+                    <p className="db-hint">The site also comes with <b>Walong Bilyon (Wedding Version)</b>, which is too large to upload here.</p>
+                    <button className="db-btn" onClick={() => up((d) => { d.music = defaultWedding.music; })}><Icon name="music" />Use Walong Bilyon</button>
+                  </div>
+                )}
               </Card>
             </Section>
           )}

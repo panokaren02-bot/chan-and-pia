@@ -25,7 +25,7 @@ export const defaultWedding = {
 
   // Background music. TikTok links can't be played directly — save the song as an mp3
   // in /public/music and set e.g. "/music/song.mp3". Source: https://vt.tiktok.com/ZSpDoaxwU/
-  music: "/audio/WALONG%20BILYON%20-%20TJ%20Monterde%20(Wedding%20Version).mp3", // "Walong Bilyon (Wedding Version)" — TJ Monterde; loops after the envelope opens
+  music: "/audio/WALONG%20BILYON%20-%20TJ%20Monterde%20(Wedding%20Version)%20(1)%20(mp3cut.net).mp3", // "Walong Bilyon (Wedding Version)" — TJ Monterde; loops after the envelope opens
 
   ceremony: {
     label: "Ceremony",
